@@ -13,6 +13,7 @@ where [options] are:
 EOB
   opt :sample_count, "Number of times to run CasperJS script", :default => 2
   opt :concurrency,  "Number of PhantomJS instances to run concurrently", :default => 2
+  stop_on_unknown 
 end
 
 Trollop::die "CasperJS executable not found.\n(Install via Homebrew: `brew install casperjs --devel`)" if `which casperjs` == ""
@@ -20,5 +21,8 @@ Trollop::die "Must specify a CasperJS script to run" if ARGV[0].nil?
 Trollop::die "Cannot find file specified: #{ARGV[0]}" unless File.exist?(ARGV[0])
 
 opts[:casper_script] = ARGV[0]
+
+# Allow for additional command line arguements to be passed to CasperJS script
+opts[:casper_args] = ARGV[1..-1]
 
 Phantomherd::Runner.new(opts).run

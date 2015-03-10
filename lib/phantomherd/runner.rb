@@ -4,22 +4,25 @@ require "em-synchrony/fiber_iterator"
 module Phantomherd
   class Runner
 
-    attr_reader :sample_count, :concurrency, :casper_script
+    attr_reader :sample_count, :concurrency, :casper_script, :casper_args
     attr_accessor :results
 
     def initialize(options)
       @sample_count = options[:sample_count]
       @concurrency = options[:concurrency]
       @casper_script = options[:casper_script]
+      @casper_args = options[:casper_args] || []
       @results = []
     end
 
     def run
       requests = (1..sample_count.to_i).to_a
+      command = "casperjs --ignore-ssl-errors=yes #{casper_script} #{casper_args.join(' ')}"
+      puts "Running: #{command}"
       EM.synchrony do
         EM::Synchrony::FiberIterator.new(requests, concurrency).each do |request|
           stime = Time.now
-          out, status = EM::Synchrony.system("casperjs --ignore-ssl-errors=yes #{casper_script}")
+          out, status = EM::Synchrony.system(command)
           print "."
           @results << Time.now - stime
         end
